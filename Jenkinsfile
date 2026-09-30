@@ -36,11 +36,13 @@ pipeline {
             }
         }
 
-        stage('Validate Compose') {
-            steps {
-                bat 'docker compose config'
-            }
-        }
+        stage('Check Docker') {
+    steps {
+        bat 'docker --version'
+        bat 'docker compose version'
+        bat 'where docker'
+    }
+}
 
         stage('Build Order API') {
             steps {
