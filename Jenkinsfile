@@ -41,6 +41,7 @@ pipeline {
         bat 'docker --version'
         bat 'docker compose version'
         bat 'where docker'
+        bat 'where docker-compose'
     }
 }
 
