@@ -15,7 +15,7 @@ pipeline {
         POSTGRES_USER = 'fooduser'
         POSTGRES_PASSWORD = 'foodpassword'
 
-        DB_HOST = 'db'
+        DB_HOST = 'localhost'
         DB_PORT = '5432'
         DB_NAME = 'foodorders'
         DB_USER = 'fooduser'
