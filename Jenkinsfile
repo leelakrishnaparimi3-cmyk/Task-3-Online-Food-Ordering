@@ -63,7 +63,6 @@ pipeline {
             }
         }
 
-        ```groovy
 stage('Wait for Application') {
     steps {
         script {
