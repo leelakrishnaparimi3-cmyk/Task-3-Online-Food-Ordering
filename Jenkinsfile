@@ -101,14 +101,15 @@ stage('Create Test Order') {
     }
 
     post {
-    failure {
-        echo 'Pipeline failed. Collecting container status and logs...'
-        bat '"%COMPOSE%" ps'
-        bat '"%COMPOSE%" logs --no-color'
-    }
+        failure {
+            echo 'Pipeline failed. Collecting container status and logs...'
+            bat '"%COMPOSE%" ps'
+            bat '"%COMPOSE%" logs --no-color'
+        }
 
-    always {
-        echo 'Stopping application containers and network. Keeping database volume.'
-        bat '"%COMPOSE%" down'
+        always {
+            echo 'Stopping application containers and network. Keeping database volume.'
+            bat '"%COMPOSE%" down'
+        }
     }
 }
