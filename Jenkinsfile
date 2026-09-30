@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -7,7 +8,8 @@ pipeline {
     }
 
     environment {
-        DOCKER_CLI_PLUGIN_EXTRA_DIRS = 'C:\\ProgramData\\docker\\cli-plugins'
+        COMPOSE = 'C:\\ProgramData\\docker\\cli-plugins\\docker-compose.exe'
+
         COMPOSE_PROJECT_NAME = 'food-ordering'
 
         POSTGRES_DB = 'foodorders'
@@ -38,23 +40,27 @@ pipeline {
         }
 
         stage('Check Docker') {
-    steps {
-        bat 'docker --version'
-        bat 'docker compose version'
-        bat 'where docker'
-        bat 'where docker-compose'
-    }
-}
+            steps {
+                bat 'docker --version'
+                bat '"%COMPOSE%" version'
+            }
+        }
+
+        stage('Validate Compose') {
+            steps {
+                bat '"%COMPOSE%" config'
+            }
+        }
 
         stage('Build Order API') {
             steps {
-                bat 'docker compose build order-api'
+                bat '"%COMPOSE%" build order-api'
             }
         }
 
         stage('Deploy Environment') {
             steps {
-                bat 'docker compose up -d'
+                bat '"%COMPOSE%" up -d'
             }
         }
 
@@ -63,7 +69,6 @@ pipeline {
                 script {
                     retry(12) {
                         sleep 5
-
                         bat '''
                         powershell -NoProfile -Command ^
                           "$r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:8080/health'; ^
@@ -98,7 +103,7 @@ pipeline {
         stage('Verify Database') {
             steps {
                 bat '''
-                docker compose exec -T db psql -U fooduser -d foodorders -c "SELECT id, customer_name, food_item, quantity, created_at FROM orders ORDER BY id DESC LIMIT 5;"
+                "%COMPOSE%" exec -T db psql -U fooduser -d foodorders -c "SELECT id, customer_name, food_item, quantity, created_at FROM orders ORDER BY id DESC LIMIT 5;"
                 '''
             }
         }
@@ -109,14 +114,16 @@ pipeline {
         failure {
             echo 'Pipeline failed. Collecting container status and logs...'
 
-            bat 'docker compose ps'
-            bat 'docker compose logs --no-color'
+            bat '"%COMPOSE%" ps'
+
+            bat '"%COMPOSE%" logs --no-color'
         }
 
         always {
             echo 'Stopping application containers and network. Keeping database volume.'
 
-            bat 'docker compose down'
+            bat '"%COMPOSE%" down'
         }
     }
 }
+```
