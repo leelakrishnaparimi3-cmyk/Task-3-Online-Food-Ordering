@@ -7,6 +7,7 @@ pipeline {
     }
 
     environment {
+        DOCKER_CLI_PLUGIN_EXTRA_DIRS = 'C:\\ProgramData\\docker\\cli-plugins'
         COMPOSE_PROJECT_NAME = 'food-ordering'
 
         POSTGRES_DB = 'foodorders'
