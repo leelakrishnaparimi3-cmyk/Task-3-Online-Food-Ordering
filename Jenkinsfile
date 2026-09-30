@@ -63,41 +63,34 @@ pipeline {
             }
         }
 
-        stage('Wait for Application') {
-            steps {
-                script {
-                    retry(12) {
-                        sleep 5
-                        bat '''
-                        powershell -NoProfile -Command ^
-                          "$r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:8080/health'; ^
-                           if ($r.StatusCode -ne 200) { exit 1 }"
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Create Test Order') {
-            steps {
+        ```groovy
+stage('Wait for Application') {
+    steps {
+        script {
+            retry(12) {
+                sleep 5
                 bat '''
-                powershell -NoProfile -Command ^
-                  "$body = @{customer_name=$env:TEST_CUSTOMER; food_item=$env:TEST_FOOD; quantity=[int]$env:TEST_QUANTITY} | ConvertTo-Json; ^
-                   $result = Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/orders' -ContentType 'application/json' -Body $body; ^
-                   $result | ConvertTo-Json"
+                powershell -NoProfile -Command "$r = Invoke-WebRequest -UseBasicParsing -Uri 'http://localhost:8080/health'; if ($r.StatusCode -ne 200) { exit 1 }"
                 '''
             }
         }
+    }
+}
+stage('Create Test Order') {
+    steps {
+        bat '''
+        powershell -NoProfile -Command "$body = @{customer_name=$env:TEST_CUSTOMER; food_item=$env:TEST_FOOD; quantity=[int]$env:TEST_QUANTITY} | ConvertTo-Json; $result = Invoke-RestMethod -Method Post -Uri 'http://localhost:8080/orders' -ContentType 'application/json' -Body $body; $result | ConvertTo-Json"
+        '''
+    }
+}
 
-        stage('Retrieve Orders') {
-            steps {
-                bat '''
-                powershell -NoProfile -Command ^
-                  "$result = Invoke-RestMethod -Method Get -Uri 'http://localhost:8080/orders'; ^
-                   $result | ConvertTo-Json -Depth 5"
-                '''
-            }
-        }
+       stage('Retrieve Orders') {
+    steps {
+        bat '''
+        powershell -NoProfile -Command "$result = Invoke-RestMethod -Method Get -Uri 'http://localhost:8080/orders'; $result | ConvertTo-Json -Depth 5"
+        '''
+    }
+}
 
         stage('Verify Database') {
             steps {
